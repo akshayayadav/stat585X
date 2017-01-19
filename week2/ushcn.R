@@ -1,0 +1,5 @@
+library(tidyverse)
+temps <- read_fwf("",
+                  col_positions = fwf_positions(
+                    start=c(1,3,4,6,13,22,33,39,42,73,80,87,94), 
+                    end  =c(2,3,5,11,20,30,37,40,71,78,85,92,95)))
