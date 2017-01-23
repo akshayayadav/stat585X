@@ -1,13 +1,19 @@
 ---
-title: "tmax_clean function"
+title: "Assignment 1"
 output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, message=FALSE)
 ```
 
-## Function for returning cleaned Weather Station data
+### Building the book
+
+The last word on page 21 is "factor"
+
+### tmax_clean Function
+
+#### Function for returning cleaned Weather Station data
 
 The compressed weather station [data](https://www1.ncdc.noaa.gov/pub/data/ushcn/v2.5/) containing the tmax temperature files must be unzipped in the same directory as this file. The function takes stationid as argument and returns a data structure with max temperature (column Temp_Max) for each Month (column Month). (Months: 1=January, 2=February and so on)
 
@@ -31,10 +37,11 @@ return(station)
 }
 ```
 
-## Calling the Function
+#### Calling the Function
 Here we are passing the station ID to the tmax_clean function and collecting the cleaned data structure. The Maximum Temperatures are plotted against the Year separately for each month.
 ```{r message=FALSE}
 library(tidyverse)
 st<-tmax_clean("USH00300937")
 st %>% ggplot(aes(x = Year, Temp_Max/100)) + geom_point() + facet_wrap(~Month, nrow=2)
 ```
+
