@@ -1,5 +1,6 @@
 ---
 title: "Assignment 1"
+author: "Akshay Yadav, Chaohui Yuan, Lawrence Hii"
 output: html_document
 ---
 
