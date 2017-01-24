@@ -9,7 +9,11 @@ knitr::opts_chunk$set(echo = TRUE, message=FALSE)
 
 ### Building the book
 
-The last word on page 21 is "factor"
+We got two different versions of the book from two different compilations on two different machines
+
+Version 1:The last word on page 21 is "factor" (Last line: take, even if you don’t see all values in a given dataset. Using a factor)
+
+Version 2: The last word on page 21 is "may" (Last line: Factors are useful when you know the possible values a variable may)
 
 ### tmax_clean Function
 
