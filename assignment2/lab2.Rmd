@@ -1,0 +1,30 @@
+---
+title: "lab assignment 2.1"
+author: "Akshay Yadav"
+
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,message = FALSE)
+```
+
+#### 1) Successful movies over past two years
+```{r}
+library(dplyr)
+movies <- read.csv("../materials/data/movies.csv")
+```
+
+There are multiple ways in which we can define success of a movie. One way to define success is to check the average weekly Gross earnings over the period of two years. This method might benefit the highly anticipated movies that are released recently. If a highly anticipated movie earns exceptionally high in the first week the Gross average will be pulled towards a higher value and the movie might be falsely considered as successful.
+
+```{r}
+movies %>% group_by(Movie) %>% summarise(mean.Gross=mean(Gross)) %>% arrange(desc(mean.Gross))
+```
+
+One other way to quantify success of a movie is to calculate the number of weeks the movie was in the top rankings (E.g top 5). This method will be biased against successful movies that are released recently.
+
+```{r}
+movies %>% group_by(Movie) %>% filter(Rank<=5) %>% summarize(nweeks=n()) %>% arrange(desc(nweeks))
+```
+
+Based on the rankings of Mean Gross Earnings and the Number of Weeks the movie was in top 5, **Star Wars Ep. VII: The Force Awakens** seems like the most successful movie over the period of last two years.
