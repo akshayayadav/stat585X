@@ -1,0 +1,7 @@
+library(maptools)
+library(ggplot2)
+library(tidyverse)
+setwd("/home/akshay/courses/stat585X/week6")
+xx <- readShapeSpatial("IND_adm0.shp")
+map <- fortify(xx)
+map %>% ggplot(aes(x = long, y = lat, group = group)) + geom_path()

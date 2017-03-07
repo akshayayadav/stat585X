@@ -1,0 +1,92 @@
+---
+title: "Lab 3"
+author: "Ganesh Krishnan; Vinny Paris; Matt Stuart; Akshay Yadav"
+date: "February 16, 2017"
+output: pdf_document
+---
+
+We will create a function that reads in a specific sheet in a specific file, and gives us only the columns that we need for our analysis.  There will also include columns with the file name and sheet name, so we know which test and which semester this data comes from.  Also, the qualitative data will be changed to all lowercase characters, since R is case sensitive and we want all the data to be consistent through out each file.
+
+```{r tidy=TRUE,warning=FALSE,message=FALSE}
+library(tidyverse)
+Testing <- function(file="Spreadsheets/FileOne.xlsx", sheet=1){
+  x <- readxl::read_excel(path=file, sheet=sheet)
+  x <- as.data.frame(x)
+  x$file = file
+  x$sheet = sheet
+  names(x)[1] <- c("ID")
+  names(x)[2] <- c("Test")
+  colnames(x) <- tolower(colnames(x))
+  x <- x %>% select(id, test, file, sheet, starts_with("gen"), starts_with("treatme"), starts_with("charac"), starts_with("tot"), starts_with("norm"))
+ names(x)[1:10] <- c("id", 'test', 'file', 'sheet', 'gender', 'treatment 1', 'treatment 2', 'characteristic', 'total',"normalized change")
+ for (i in 1:(ncol(x)-2)) {
+   x[,i] <- tolower(x[,i])
+ }
+ return(as.data.frame(x))
+}
+```
+
+We will now upload all eight data frames for our analysis into R.
+
+```{r tidy=TRUE,warning=FALSE,message=FALSE}
+S11_1 <- Testing()
+F11_1 <- Testing(sheet=2)
+S12_1 <- Testing(sheet=3)
+F12_1 <- Testing(sheet=4)
+S11_2 <- Testing("Spreadsheets/FileTwo.xlsx", sheet=1)
+F11_2 <- Testing("Spreadsheets/FileTwo.xlsx", sheet=2)
+S12_2 <- Testing("Spreadsheets/FileTwo.xlsx", sheet=3)
+F12_2 <- Testing("Spreadsheets/FileTwo.xlsx", sheet=4)
+data <- rbind(S11_1, F11_1, S12_1, F12_1, S11_2, F11_2, S12_2, F12_2)
+```
+
+We will have tests to make sure every student took two tests in a semester for each test type, and ensure the number of pre taken equals the number of post taken.
+
+```{r tidy=TRUE,warning=FALSE,message=FALSE}
+G <- sum((table(data[,1]) == 2) -1)
+H <- table(data[,2])
+G
+H
+```
+
+We will check to see if every student id took four different tests.
+
+```{r tidy=TRUE,warning=FALSE,message=FALSE}
+length(unique(data$id))
+```
+
+This does not seem to be the case.  The reason is student IDs were coded different for tests one and two in Fall 2012.  We can manually make that change for those students.
+
+```{r tidy=TRUE,warning=FALSE,message=FALSE}
+data$id <- ifelse(as.numeric(data$id) >= 41000, as.numeric(data$id) - 1000, as.numeric(data$id))
+```
+
+Then, if we check again,
+
+```{r tidy=TRUE,warning=FALSE,message=FALSE}
+length(unique(data$id))
+```
+
+the data is good in this regard.  This is because further investigation revealed some students only took one of the two tests, so that is accounted for in this part.
+
+We will now change the file and sheet columns to measure and semester, to match the information the current columns identify.
+
+```{r tidy=TRUE,warning=FALSE,message=FALSE}
+data$measure <- ifelse(data$file=="spreadsheets/fileone.xlsx",1,2)
+data$sheet <- as.numeric(data$sheet)
+data$semester <- ifelse(data$sheet=="1","Spring '11",ifelse(data$sheet=="2","Fall '11",ifelse(data$sheet=="3","Spring '12","Fall '12")))
+data <- data %>% select(-file,-sheet)
+```
+
+Finally, I noticed that student information such as gender, treatments and characteristic are available for the pre scores but not the post scores.  So, we will copy that information into the post score information by each id.
+
+```{r tidy=TRUE,warning=FALSE,message=FALSE}
+for (i in 1:nrow(data)) {
+  data$gender[i] <- ifelse(data$test[i]=="pre",data$gender[i],data$gender[data$id==data$id[i] & data$test=="pre" & data$measure==data$measure[i]])
+  data$`treatment 1`[i] <- ifelse(data$test[i]=="pre",data$`treatment 1`[i],data$`treatment 1`[data$id==data$id[i] & data$test=="pre" & data$measure==data$measure[i]])
+  data$`treatment 2`[i] <- ifelse(data$test[i]=="pre",data$`treatment 2`[i],data$`treatment 2`[data$id==data$id[i] & data$test=="pre" & data$measure==data$measure[i]])
+  data$characteristic[i] <- ifelse(data$test[i]=="pre",data$characteristic[i],data$characteristic[data$id==data$id[i] & data$test=="pre" & data$measure==data$measure[i]])
+}
+```
+
+There are a few missing data points for gender and characteristic in some data points, which we cannot resolve unless we have some new data.
